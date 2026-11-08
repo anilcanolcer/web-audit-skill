@@ -1,0 +1,16 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "web-audit CLI input",
+  "description": "Run web-audit URL --format json and parse stdout as the report.",
+  "type": "object",
+  "properties": {
+    "url": { "type": "string", "format": "uri", "description": "HTTP(S) URL to audit" },
+    "pages": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 },
+    "format": { "type": "string", "enum": ["json", "markdown", "html", "both"], "default": "json", "description": "Use json for a machine-readable report on stdout." },
+    "mobile": { "type": "boolean", "default": false },
+    "screenshot": { "type": "boolean", "default": false },
+    "timeout": { "type": "number", "exclusiveMinimum": 0, "maximum": 300, "default": 30, "description": "Per-navigation or request timeout in seconds" },
+    "output": { "type": "string", "default": "./audit-result" }
+  },
+  "required": ["url"], "additionalProperties": false
+}
