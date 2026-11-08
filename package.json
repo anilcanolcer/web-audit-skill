@@ -1,7 +1,9 @@
 {
   "name": "web-audit-skill",
-  "version": "1.1.1",
+  "version": "1.2.0",
   "description": "Agent-friendly browser audit for SEO, AEO, performance and accessibility",
+  "keywords": ["seo", "aeo", "audit", "accessibility", "playwright", "mcp", "cli"],
+  "repository": { "type": "git", "url": "https://github.com/anilcanolcer/web-audit-skill.git" },
   "type": "module",
   "bin": { "web-audit": "dist/cli.js", "web-audit-skill": "dist/cli.js" },
   "files": ["dist", "assets", "SKILL.md", "tool.schema.json", "README.md", "LICENSE"],

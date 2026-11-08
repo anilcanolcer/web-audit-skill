@@ -47,6 +47,7 @@ In managed environments, `WEB_AUDIT_CHROMIUM_EXECUTABLE` can point to an existin
 ```sh
 npx web-audit-skill https://example.com
 npx web-audit-skill https://example.com --pages 3 --mobile --screenshot --output ./audit-result
+npx web-audit-skill https://example.com --compare https://example.org --pages 2
 ```
 
 Or install globally:
@@ -66,10 +67,13 @@ The package must be published under this name before the npx and npm commands wo
 | `--format json\|markdown\|html\|both` | Files to write and stdout mode; default both writes all three. |
 | `--output ./audit-result` | Output directory; created as needed. |
 | `--mobile` | Also render at a 390px mobile viewport and check overflow. |
+| `--compare <url>` | Also audit a second HTTP(S) site with the same options and page limit, then include a side-by-side comparison. |
 | `--screenshot` | Save full-page PNGs; with mobile, also save mobile PNGs. |
 | `--timeout 30` | Per navigation/request timeout in seconds, maximum 300; not a whole-run deadline. |
 
 `report.json` contains the complete report, `report.md` is the readable version, and `report.html` is a self-contained visual report with no external assets. With `--format json`, stdout contains only the complete JSON report; progress and errors go to stderr. With `both` or `html`, stdout contains a small JSON summary; Markdown mode prints Markdown. Exit status is nonzero for invalid arguments, launch errors, or when no page was audited; a completed audit can still include warnings and failed individual pages. Use the report's `warnings` and `pages` to check coverage.
+
+Comparison runs both audits sequentially, so it can take roughly twice as long. JSON includes `comparison.report` (the complete second audit), `comparison.scoresDiff` (comparison minus primary), and finding differences keyed by check ID. A negative difference means the comparison site's score is lower. Matching checks are not matched by page or proof of resolution. A failed side has null scores and null finding differences; the CLI returns a nonzero status if either side audits no pages. With screenshots enabled, the second site's screenshots are saved under `comparison/` inside the output directory. Report and screenshot files may be overwritten when an output directory is reused.
 
 Example summary (scores shown only as an illustration):
 
@@ -87,7 +91,26 @@ Example finding from `report.json` (excerpt):
 
 Copy `SKILL.md` and `tool.schema.json` into a `web-audit-skill` directory under your agent's skills location (for example, `~/.claude/skills/` or `~/.agents/skills/` where supported). Consult your agent's documentation for its current discovery path; Cursor can also use the instructions as a project rule. Install this package globally, or allow the skill to invoke `npx`. The skill describes how to interpret the results and treats audited pages as untrusted data.
 
-For tool adapters, `tool.schema.json` defines input parameters. Execute `web-audit <url> --format json` with arguments passed as an array (never through an interpolated shell), then parse stdout. Report version 1.1 adds `executive_summary`, `scores.ai_citability`, page-level `metrics.schema_quality` and `metrics.ai_citability`, and `priority`, `estimated_effort`, and `suggested_fix` on each finding; existing `severity` and `recommendation` fields remain for compatibility. The executive summary has at most five strings. Each finding also has a stable check ID, category, evidence, and page URL. This package supplies a CLI and skill, not an MCP server; an MCP host can wrap the CLI using this schema.
+For tool adapters, `tool.schema.json` defines input parameters. Execute `web-audit <url> --format json` with arguments passed as an array (never through an interpolated shell), then parse stdout. Report version 1.1 adds `executive_summary`, `scores.ai_citability`, page-level `metrics.schema_quality` and `metrics.ai_citability`, and `priority`, `estimated_effort`, and `suggested_fix` on each finding; existing `severity` and `recommendation` fields remain for compatibility. The executive summary has at most five strings. Each finding also has a stable check ID, category, evidence, and page URL.
+
+### MCP server
+
+The package includes a lightweight JSON-RPC stdio MCP server exposing `web_audit`, with the same inputs as `tool.schema.json`, including optional `compare`. It supports the `initialize`, `ping`, `tools/list`, and `tools/call` methods for MCP protocol versions 2024-11-05 through 2025-11-25; it does not expose HTTP transport, resources, or prompts. Tool output includes the complete report as JSON text and structured content. It writes report files to `output` (default `./audit-result` relative to the client process); supply an absolute path to control their location. If either requested site is not audited, the tool result has `isError: true` and includes the report and warnings.
+
+Start it with `npx web-audit-skill mcp` after publishing, or from a built checkout with `node dist/mcp.js`. For example, in Claude Desktop's MCP server configuration, use an absolute checkout path (on Windows use `node.exe` on PATH and forward slashes or escaped backslashes in the JSON):
+
+```json
+{
+  "mcpServers": {
+    "web-audit": {
+      "command": "node",
+      "args": ["/absolute/path/to/web-audit-skill/dist/mcp.js"]
+    }
+  }
+}
+```
+
+Run `npm install` and `npm run build` in that checkout first, then restart the client. Other stdio MCP clients accept the same command and arguments. The host must have Node.js and a working Playwright Chromium installation. No logs or progress are written to stdout; stdout is reserved for MCP messages. Only expose this server to trusted clients and network destinations, and audit sites you have permission to access.
 
 ## What the checks mean
 
@@ -107,5 +130,19 @@ The 45-second target for three pages is best effort, not a guarantee: page load 
 ## Development and license
 
 Run `npm test` to build and execute the core tests. `npm pack` produces a publishable archive after building; inspect package contents and confirm the package name is available before publishing. MIT licensed; see [LICENSE](LICENSE).
+
+### Publishing
+
+After reviewing the package, authenticate and publish manually from the project directory:
+
+```sh
+npm install
+npm test
+npm pack --dry-run
+npm login
+npm publish --access public
+```
+
+The package is not published by these instructions; publishing requires an npm account with permission to use the package name.
 
 SitePulse or other monitoring systems can invoke the JSON mode on a schedule and store successive reports, but this package does not include monitoring or an integration service.

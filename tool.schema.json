@@ -5,6 +5,7 @@
   "type": "object",
   "properties": {
     "url": { "type": "string", "format": "uri", "description": "HTTP(S) URL to audit" },
+    "compare": { "type": "string", "format": "uri", "description": "Optional second HTTP(S) URL for side-by-side comparison." },
     "pages": { "type": "integer", "minimum": 1, "maximum": 10, "default": 3 },
     "format": { "type": "string", "enum": ["json", "markdown", "html", "both"], "default": "json", "description": "Use json for a machine-readable report on stdout." },
     "mobile": { "type": "boolean", "default": false },
