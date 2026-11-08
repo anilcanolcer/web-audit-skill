@@ -6,7 +6,7 @@
   "repository": { "type": "git", "url": "https://github.com/anilcanolcer/web-audit-skill.git" },
   "type": "module",
   "bin": { "web-audit": "dist/cli.js", "web-audit-skill": "dist/cli.js" },
-  "files": ["dist", "assets", "SKILL.md", "tool.schema.json", "README.md", "LICENSE"],
+  "files": ["dist", "assets", "SKILL.md", "tool.schema.json", "README.md", "README.tr.md", "LICENSE"],
   "engines": { "node": ">=20" },
   "scripts": { "build": "tsc", "test": "npm run build && node --test test/*.test.mjs", "prepack": "npm run build" },
   "dependencies": { "playwright-chromium": "^1.49.0", "robots-parser": "^3.0.1" },

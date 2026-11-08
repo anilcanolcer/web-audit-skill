@@ -4,6 +4,14 @@
 
 A browser-based, agent-friendly website audit for technical SEO, AI-answer readiness, performance signals, accessibility, security headers, and mobile layout.
 
+**[Türkçe kullanım rehberi](README.tr.md)** · English
+
+## Report preview
+
+![Example HTML report with audit scores](assets/report-preview.png)
+
+An actual local run against Python.org, captured with version 1.1.1 on 9 November 2026. Results vary by run; the mobile score covers only the checks described below and is not a certification.
+
 ## For complete beginners
 
 1. Install [Node.js](https://nodejs.org/) version 20 or newer, which includes npm.
