@@ -21,6 +21,13 @@ export interface PageResult {
     redirects: string[];
     screenshot?: string;
 }
+export interface Comparison {
+    report: Report;
+    scoresDiff: Record<Category | 'overall' | 'ai_citability', number | null>;
+    onlyPrimary: Finding[] | null;
+    onlyComparison: Finding[] | null;
+    sharedFindingIds: string[] | null;
+}
 export interface Report {
     executive_summary: string[];
     schemaVersion: '1.1';
@@ -31,6 +38,7 @@ export interface Report {
     pages: PageResult[];
     prioritizedFixes: Finding[];
     warnings: string[];
+    comparison?: Comparison;
 }
 export declare const categories: Category[];
 export declare function score(findings: Finding[], pageCount: number, mobileComplete?: boolean): Report['scores'];
